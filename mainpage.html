@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+
+</head>
+<style>
+    h1 {
+        display: inline;
+        position: relative;
+        left: 1000px;
+        top: -750px;
+    }
+
+    #map {
+        width: 50%;
+        height: 710px;
+     
+    }
+</style>
+
+<body>
+    <div id="map" ></div>
+
+    <script>
+        this.app7.submit(62.636217283280246, 15.96206700543189)
+        var globalmap;
+        var markerarray = [];
+        function setMapOnAll(map) {
+            for (var i = 0; i < markerarray.length; i++) {
+                markerarray[i].setMap(map);
+            }
+        }
+        function myMap() {
+            var mapCanvas = document.getElementById("map");
+            var myCenter = new google.maps.LatLng(62.636217283280246, 15.96206700543189);
+            var mapOptions = { center: myCenter, zoom: 6 };
+            var map = new google.maps.Map(mapCanvas, mapOptions);
+            globalmap = map
+            google.maps.event.addListener(map, 'click', function (event) {
+                setMapOnAll(null);
+                placeMarker(map, event.latLng);
+
+
+            });
+        }
+
+        function placeMarker(map, location) {
+
+            var marker = new google.maps.Marker({
+                position: location,
+                map: map
+
+            });
+
+            this.app7.submit(location.lat(), location.lng())
+            markerarray.push(marker);
+
+
+        }
+
+        function placeMarker2(loc, name) {
+
+            var posti = { lat: loc.lat, lng: loc.lng };
+
+            map = globalmap;
+            var marker = new google.maps.Marker({
+                position: posti,
+                map: map
+
+
+            });
+
+
+            var infowindow = new google.maps.InfoWindow({
+                content: name.name + " " + name.price
+            });
+            infowindow.open(map, marker);
+            markerarray.push(marker);
+
+
+
+        }
+
+    </script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBu5o_Xz9UETRWFq26j7V3HlnNW1cx-pO0&callback=myMap"></script>
+    <div id="app-7">
+
+        <!--<input v-model="postalcodeinput" placeholder="area in km">-->
+
+
+
+        <todo-item v-for="item in datalist" v-bind:todo="item" v-bind:link="item.website" v-bind:linkname.="item.linkname" v-bind:key="item.id">
+
+
+        </todo-item>
+
+
+
+
+
+
+    </div>
+
+    <script>
+        Vue.component('todo-item', {
+            props: ['todo', 'link', 'linkname'],
+            template: '<div class="blog-post"> <span><h1>{{ todo.name }}  </h1> <h1>{{ todo.price }}  </h1> <h1> kr </h1> <h1> {{todo.distance}} </h1> <h1> km </h1> <a :href="link"> {{ todo.website }} </a> </span> </div>  ',
+
+        })
+
+
+
+        var app7 = new Vue({
+            el: '#app-7',
+            data: {
+                activeColor: 'red',
+                fontSize: 30,
+                padd: 15,
+                wrap: 'inline',
+                linklist: [
+
+                ],
+                datalist: [
+            
+
+                ],
+                postalcodeinput: '',
+                geolat: '',
+                geolng: ';'
+            },
+            methods: {
+                submit: function (a, b) {
+                    if (this.postalcodeinput >= 1) {
+                        this.postalcodeinput = 15;
+                    }
+                    else {
+                        console.log("noinput");
+                        //generate all markers and stores if no value is given
+                        this.postalcodeinput = 9999;
+                    }
+
+
+                    console.log(this.postalcodeinput);
+
+                    c = this.postalcodeinput;
+
+                    var payload = { lat: a, long: b, dis: c };
+                    console.log(a, b);
+                    this.$http.post('/ajaxcall', payload).then((response) => {
+                        var a = response.body
+                        this.object = a;
+                        this.datalist = response.body;
+                        console.log(this.datalist);
+                        console.log(a);
+
+                        var a2 = 0;
+                        var a3 = a.length;;
+
+
+                        while (a2 < a3) {
+
+                            var parsedfloatlon = parseFloat(a[a2].lon);
+                            var parsedfloatlat = parseFloat(a[a2].lat);
+                            var cordinates = { lat: parsedfloatlon, lng: parsedfloatlat };
+                            var storedata = { price: a[a2].price, name: a[a2].name }
+                            placeMarker2(cordinates, storedata);
+                            a2++;
+                        }
+
+                    });
+
+                },
+
+
+            }
+        })
+    </script>
+
+</body>
